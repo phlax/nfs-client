@@ -1,0 +1,30 @@
+# docker-compose for nfs-client
+#
+version: "2.4"
+services:
+
+  nfs-client:
+    privileged: true
+    image: phlax/nfs-client
+    networks:
+    - nfs
+    environment:
+    - SERVER=nfs-server
+    - SHARE=/
+    - MOUNT_OPTIONS=nfsvers=4,ro
+    - FSTYPE=nfs4
+
+  nfs-server:
+    privileged: true
+    image: phlax/nfs-server
+    networks:
+    - nfs
+    environment:
+    - NFS_EXPORT_0=/export *(rw,fsid=0,no_subtree_check,sync,no_root_squash)
+    - NFS_EXPORT_1=/export/directory1 *(ro,no_subtree_check,no_root_squash)
+    - NFS_EXPORT_2=/export/directory2 *(ro,no_subtree_check,no_root_squash)
+    volumes:
+    - ${PWD}/export:/export
+
+networks:
+  nfs:
