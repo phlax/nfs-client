@@ -1,0 +1,53 @@
+# https://travis-ci.org/#!/phlax/nfs-client
+dist: trusty
+sudo: true
+language: python
+services:
+  - docker
+
+before_install:
+  - "echo '{\"storage-driver\": \"overlay2\"}' | sudo tee /etc/docker/daemon.json"
+  - "sudo apt-get install -qq -y docker-ce"
+
+install:
+  - pip install -U docker-compose
+  - docker-compose build nfs-client
+
+script:
+
+  - sudo modprobe nfs
+  - sudo modprobe nfsd
+
+  # set the environment
+  - echo "COMPOSE_FILE=./example/docker-compose.yml" > ./.env
+
+  # add directories expected in nfs server config
+  - mkdir -p export/directory1
+  - mkdir -p export/directory2
+  - echo bar > export/directory1/foo.txt
+
+  # up the nfs server...
+  - docker-compose pull nfs-server
+  - docker-compose up -d nfs-server
+
+  - docker-compose logs nfs-server
+
+  # add a file
+  - docker-compose exec nfs-server sh -c "echo bar2 > /export/directory2/foo2.txt"
+
+  # check the mounts on the nfs-server
+  - docker-compose exec nfs-server exportfs
+
+  # up the nfs client
+  - docker-compose up -d nfs-client
+
+  # check the files
+  - docker-compose exec nfs-client cat /mnt/nfs-1/directory1/foo.txt
+
+  - docker-compose exec nfs-client cat /mnt/nfs-1/directory2/foo2.txt
+
+after_success:
+
+  - docker-compose build nfs-client
+  - docker login -u phlax -p "$DOCKER_PASSWORD"
+  - docker push phlax/nfs-client
