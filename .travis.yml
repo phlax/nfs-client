@@ -40,11 +40,19 @@ script:
 
   # up the nfs client
   - docker-compose up -d nfs-client
+  - docker-compose logs nfs-client
 
   # check the files
   - docker-compose exec nfs-client cat /mnt/nfs-1/directory1/foo.txt
-
   - docker-compose exec nfs-client cat /mnt/nfs-1/directory2/foo2.txt
+
+  # the mount is visible from the host
+  - docker-compose exec nfs-client bash -c "mount | grep nfs"
+
+  # stopping the client unmounts nfs share
+  - docker-compose stop nfs-client
+  - docker-compose logs nfs-client
+
 
 after_success:
 
