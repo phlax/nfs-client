@@ -9,6 +9,7 @@ echo "Starting NFS client ====================================="
 
 function term_handler () {
     echo "Stopping NFS client ====================================="
+    echo "Unmounting $MOUNTPOINT ($SERVER:$SHARE)"
     umount -t "$FSTYPE" "$MOUNTPOINT"
     exit 143;
 }
