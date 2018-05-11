@@ -8,8 +8,3 @@ services:
     image: phlax/nfs-client
     build:
       context: ./docker
-    environment:
-    - SERVER=nfs
-    - SHARE=/
-    - MOUNT_OPTIONS=nfsvers=4,ro
-    - FSTYPE=nfs4
