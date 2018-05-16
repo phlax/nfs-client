@@ -43,8 +43,8 @@ script:
   - docker-compose logs nfs-client
 
   # check the files
-  - docker-compose exec nfs-client cat /mnt/nfs-1/directory1/foo.txt
-  - docker-compose exec nfs-client cat /mnt/nfs-1/directory2/foo2.txt
+  - docker-compose exec nfs-client cat /mnt/nfs-1/nfs-server/directory1/foo.txt
+  - docker-compose exec nfs-client cat /mnt/nfs-1/nfs-server/directory2/foo2.txt
 
   # the mount is visible from the host
   - docker-compose exec nfs-client bash -c "mount | grep nfs"
