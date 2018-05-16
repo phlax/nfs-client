@@ -7,7 +7,7 @@ services:
 
 before_install:
   - "echo '{\"storage-driver\": \"overlay2\"}' | sudo tee /etc/docker/daemon.json"
-  - "sudo apt-get install -qq -y docker-ce"
+  - sudo service docker restart
 
 install:
   - pip install -U docker-compose
