@@ -4,12 +4,7 @@ set -e
 
 echo "Starting NFS clients ===================================="
 
-
-function term_handler () {
-    echo "Unmounting $MOUNTPOINT ($SERVER:$SHARE)"
-    umount -t "$FSTYPE" "$MOUNTPOINT$SHARE"
-    exit 143;
-}
+STOP_TIMEOUT=30
 
 function stop_nfs_import () {
     IMPORT=$1
@@ -18,9 +13,10 @@ function stop_nfs_import () {
     read -r -a NFS_CONFIG <<< "$NFS_CONFIG_LINE"
     local NFS_SERVER=${NFS_CONFIG[1]}
     local NFS_MOUNT=${NFS_CONFIG[2]}
-    echo "Unmount $MOUNTPOINT/$NFS_SERVER$NFS_MOUNT"
-    umount "$MOUNTPOINT/$NFS_SERVER$NFS_MOUNT"
-    # mount -t "$NFS_TYPE" # | grep -e "^$MOUNTPOINT/$NFS_SERVER$NFS_MOUNT"
+    echo "Unmounting $MOUNTPOINT/$NFS_SERVER$NFS_MOUNT..."
+    timeout $STOP_TIMEOUT umount "$MOUNTPOINT/$NFS_SERVER$NFS_MOUNT" || umount -v -f "$MOUNTPOINT/$NFS_SERVER$NFS_MOUNT"
+    ! $(mount -t "$NFS_TYPE" | grep -E  "^$NFS_SERVER:([/]*)$NFS_MOUNT" || false) || stop_nfs_import $IMPORT
+    echo "Unmounted $MOUNTPOINT/$NFS_SERVER$NFS_MOUNT"
 }
 
 
