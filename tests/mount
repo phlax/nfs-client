@@ -1,0 +1,36 @@
+#!/bin/bash
+
+if [ ! -z "$TRAP_ERRORS" ]; then
+    trap "$TRAP_ERRORS" ERR
+fi
+
+# add directories expected in nfs server config
+mkdir -p ./export/directory1
+mkdir -p ./export/directory2
+echo bar > ./export/directory1/foo.txt
+
+# add a file
+docker-compose exec nfs-server sh -c "echo bar2 > /export/directory2/foo2.txt"
+
+# check the mounts on the nfs-server
+docker-compose exec nfs-server exportfs
+
+# up the nfs client
+docker-compose up -d nfs-client
+docker-compose logs nfs-client
+
+docker-compose exec nfs-client mount -t nfs4
+docker-compose exec nfs-client ls /mnt/nfs-1/nfs-server/directory1
+docker-compose exec nfs-client ls /mnt/nfs-1/nfs-server/directory2
+
+
+# check the files
+# docker-compose exec nfs-client cat /mnt/nfs-1/nfs-server/directory1/foo.txt
+docker-compose exec nfs-client cat /mnt/nfs-1/nfs-server/directory2/foo2.txt
+
+# the mount is visible from the host
+docker-compose exec nfs-client bash -c "mount | grep nfs"
+
+# stopping the client unmounts nfs share
+docker-compose stop nfs-client
+docker-compose logs nfs-client
