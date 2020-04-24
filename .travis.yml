@@ -1,61 +1,34 @@
 # https://travis-ci.org/#!/phlax/nfs-client
-dist: trusty
-sudo: true
+dist: bionic
 language: python
-services:
-  - docker
 
 before_install:
-  - "echo '{\"storage-driver\": \"overlay2\"}' | sudo tee /etc/docker/daemon.json"
-  - sudo service docker restart
-
-install:
-  - pip install -U docker-compose
-  - docker-compose build nfs-client
-
-script:
-
+  - make image
+  - make pysh
   - sudo modprobe nfs
   - sudo modprobe nfsd
+
+install:
+
+  - mkdir -p ./export/directory1
+  - mkdir -p ./export/directory2
 
   # set the environment
   - echo "COMPOSE_FILE=./example/docker-compose.yml" > ./.env
 
-  # add directories expected in nfs server config
-  - mkdir -p export/directory1
-  - mkdir -p export/directory2
-  - echo bar > export/directory1/foo.txt
-
-  # up the nfs server...
-  - docker-compose pull nfs-server
+script:
   - docker-compose up -d nfs-server
-
   - docker-compose logs nfs-server
 
-  # add a file
-  - docker-compose exec nfs-server sh -c "echo bar2 > /export/directory2/foo2.txt"
+  - pysh ./tests/mount
 
-  # check the mounts on the nfs-server
-  - docker-compose exec nfs-server exportfs
+before_deploy:
+  - echo $DOCKER_PASSWORD | docker login -u phlax --password-stdin
 
-  # up the nfs client
-  - docker-compose up -d nfs-client
-  - docker-compose logs nfs-client
-
-  # check the files
-  - docker-compose exec nfs-client cat /mnt/nfs-1/nfs-server/directory1/foo.txt
-  - docker-compose exec nfs-client cat /mnt/nfs-1/nfs-server/directory2/foo2.txt
-
-  # the mount is visible from the host
-  - docker-compose exec nfs-client bash -c "mount | grep nfs"
-
-  # stopping the client unmounts nfs share
-  - docker-compose stop nfs-client
-  - docker-compose logs nfs-client
-
-
-after_success:
-
-  - docker-compose build nfs-client
-  - docker login -u phlax -p "$DOCKER_PASSWORD"
-  - docker push phlax/nfs-client
+deploy:
+  provider: script
+  script: make hub-images
+  skip_cleanup: true
+  on:
+    all_branches: true
+    condition: $TRAVIS_BRANCH =~ ^(master)$
