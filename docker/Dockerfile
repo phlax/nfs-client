@@ -1,11 +1,16 @@
-ARG BUILD_FROM=debian:stretch-slim
+ARG BUILD_FROM=debian:buster-slim
 
 FROM $BUILD_FROM
 ARG DEBIAN_FRONTEND=noninteractive
 
 ENV MOUNTPOINT /mnt/nfs-1
 
-RUN apt-get update -qq -y && apt-get install -qq -y nfs-client && rm -rf /var/tmp/*
+RUN apt-get update -qq -y \
+	&& apt-get install -qq -y \
+              --no-install-recommends \
+              --no-install-suggests \
+         	nfs-client \
+	&& rm -rf /var/tmp/*
 
 ADD nfs-entry.sh /usr/local/bin/entry.sh
 

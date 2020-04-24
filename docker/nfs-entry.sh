@@ -42,16 +42,16 @@ function mount_nfs_import () {
        done
     fi
     RESOLVED=$(getent hosts $NFS_SERVER | awk '{ print $1 }')
-    if [ -z "$NFS_OPTIONS"  ]; then
-        if [ $NFS_TYPE = 'nfs4' ]; then
-            NFS_OPTIONS='nfsvers=4'
-        fi
+    if [ $NFS_TYPE = 'nfs4' ]; then
+        NFS_OPTIONS="$NFS_OPTIONS,nfsvers=4"
     fi
     # rpc.statd & rpcbind -f &
     mkdir -p "$MOUNTPOINT/$NFS_SERVER$NFS_MOUNT"
 
     echo "Mounting $NFS_SERVER($RESOLVED):$NFS_MOUNT to $MOUNTPOINT/$NFS_SERVER$NFS_MOUNT with $NFS_OPTIONS"
-    mount -t "$NFS_TYPE" -o "$NFS_OPTIONS" "$NFS_SERVER:$NFS_MOUNT" "$MOUNTPOINT/$NFS_SERVER$NFS_MOUNT"
+    mnt="mount -t $NFS_TYPE -o $NFS_OPTIONS $NFS_SERVER:$NFS_MOUNT $MOUNTPOINT/$NFS_SERVER$NFS_MOUNT"
+    echo "CMD: $mnt"
+    $mnt
     mount -t "$NFS_TYPE" | grep -E  "^$NFS_SERVER:([/]*)$NFS_MOUNT"
 }
 
