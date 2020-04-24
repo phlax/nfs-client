@@ -1,0 +1,8 @@
+#!/bin/sh
+
+
+echo "STARTING PROXY"
+
+socat TCP4-listen:2049,fork TCP:nfs-server:2049
+
+echo "PROXY STARTED"
