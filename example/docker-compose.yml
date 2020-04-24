@@ -7,7 +7,7 @@ services:
     privileged: true
     image: phlax/nfs-client
     networks:
-    - nfs
+      - nfs
     environment:
       NFS_0: nfs4 nfs-server /directory1
       NFS_1: nfs4 nfs-server /directory2 nfsvers=4,ro
@@ -16,13 +16,14 @@ services:
     privileged: true
     image: phlax/nfs-server
     networks:
-    - nfs
+      - nfs
     environment:
-    - NFS_EXPORT_0=/export *(rw,fsid=0,no_subtree_check,sync,no_root_squash)
-    - NFS_EXPORT_1=/export/directory1 *(rw,no_subtree_check,no_root_squash)
-    - NFS_EXPORT_2=/export/directory2 *(ro,no_subtree_check,no_root_squash)
+      - NFS_DISABLE_VERSION_3=1
+      - NFS_EXPORT_0=/export *(rw,fsid=0,no_subtree_check,sync,no_root_squash)
+      - NFS_EXPORT_1=/export/directory1 *(rw,no_subtree_check,no_root_squash)
+      - NFS_EXPORT_2=/export/directory2 *(ro,no_subtree_check,no_root_squash)
     volumes:
-    - ${PWD}/export:/export
+      - ${PWD}/export:/export
 
 networks:
   nfs:
