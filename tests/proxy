@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if [ ! -z "$TRAP_ERRORS" ]; then
+    trap "$TRAP_ERRORS" ERR
+fi
+
+echo "Running proxy tests"
+
+docker-compose up -d nfs-proxy
+docker-compose up -d nfs-proxied-client
+
+docker-compose exec nfs-proxied-client cat /mnt/nfs-1/nfs-proxy/directory1/foo.txt
+docker-compose exec nfs-proxied-client cat /mnt/nfs-1/nfs-proxy/directory2/foo2.txt
