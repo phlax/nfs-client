@@ -6,7 +6,7 @@ SHELL := /bin/bash
 images:
 	docker build \
 		-t phlax/nfs-server \
-		github.com/phlax/docker-nfs-server#grace-period
+		github.com/phlax/docker-nfs-server#build
 	docker build \
 	         -t phlax/nfs-client \
 		docker
