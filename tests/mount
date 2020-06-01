@@ -34,3 +34,6 @@ docker-compose exec nfs-client bash -c "mount | grep nfs"
 # stopping the client unmounts nfs share
 docker-compose stop nfs-client
 docker-compose logs nfs-client
+
+
+docker-compose exec -T nfs-server grep NFSD /var/log/syslog
