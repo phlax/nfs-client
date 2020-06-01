@@ -6,7 +6,7 @@ SHELL := /bin/bash
 images:
 	docker build \
 		-t phlax/nfs-server \
-		github.com/phlax/docker-nfs-server#build
+		github.com/phlax/docker-nfs-server
 	docker build \
 	         -t phlax/nfs-client \
 		docker
