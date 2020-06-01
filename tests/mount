@@ -36,4 +36,4 @@ docker-compose stop nfs-client
 docker-compose logs nfs-client
 
 
-grep NFSD /var/log/syslog
+sudo grep NFSD /var/log/syslog
